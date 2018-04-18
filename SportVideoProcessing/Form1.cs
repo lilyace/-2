@@ -5,14 +5,16 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-//using System.Threading.Tasks;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Accord.Video.FFMPEG;
+using Accord.Video;
 using Accord.Vision;
 using System.Text.RegularExpressions;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV;
+using ContourAnalysisNS;
 using Emgu.Util;
 using Emgu.CV.UI;
 using Emgu.CV.Cuda;
@@ -30,8 +32,8 @@ namespace SportVideoProcessing
         private long frameCount;
         private long frameNum;
         float motionLevel;
-        string templateFile;
-        Dictionary<string, Image> AugmentedRealityImages = new Dictionary<string, Image>();
+        ImageProcessor processorFrame;
+        Image<Bgr, Byte> Myframe;
         Accord.Vision.Motion.TwoFramesDifferenceDetector detector = new Accord.Vision.Motion.TwoFramesDifferenceDetector()
         {
             DifferenceThreshold = 2,
@@ -114,18 +116,76 @@ namespace SportVideoProcessing
         }       
         void ReadVideo(string _fileName)
         {
-            Regex regex = new Regex(@"Video\\.+$");
+            Regex regex = new Regex(@"Тестовые видеофайлы\\.+$");
             Match match = regex.Match(_fileName);            
             //nameLabel.Text = match.Value.Remove(0,6);            
             reader.Open(_fileName);
             frameCount = reader.FrameCount;
             durationLabel.Text = frameCount.ToString();
             label5.Text = reader.Height.ToString() + "x" + reader.Width.ToString();
-            Bitmap bitmap;        
-                bitmap = reader.ReadVideoFrame(); // берем первый кадр и делаем на нем распознаванием           
-            RecognizePeople(_fileName);
-
+            Bitmap firstFrame;        
+            firstFrame = reader.ReadVideoFrame(); // берем первый кадр и делаем на нем распознаванием           
+            // RecognizePeople(_fileName);
+            WorkWithFrame(firstFrame, _fileName);
         }
+        public void WorkWithFrame(Bitmap _frame, string _filename)
+        {
+            // //IntPtr image=new IntPtr();
+            // Mat image = new Mat();
+            // MIplImage dst=new MIplImage();
+            // //IntPtr dest = new IntPtr();
+            // Mat dest = new Mat();
+            // //IntPtr rgb = new IntPtr();
+            // Mat rgb = new Mat();
+            // IntPtr r_plane = new IntPtr();
+            //IntPtr g_plane = new IntPtr();
+            // IntPtr b_plane = new IntPtr();
+            // // для хранения каналов RGB после преобразования
+            // IntPtr r_range = new IntPtr();
+            // IntPtr g_range = new IntPtr();
+            // IntPtr b_range = new IntPtr();
+            // // для хранения суммарной картинки
+            // IntPtr rgb_and = new IntPtr();
+            // Emgu.CV.Image<Bgr, Byte> img = new Image<Bgr, byte>(_frame);
+            //  //image = _frame.GetHbitmap();
+            // image = img.Mat;
+            // //Создаем картинки
+            //// rgb = CvInvoke.cvCreateImage(_frame.Size, IplDepth.IplDepth_8U, 3);
+            //r_plane= CvInvoke.cvCreateImage(_frame.Size, IplDepth.IplDepth_8U, 1);
+            //g_plane =CvInvoke.cvCreateImage(_frame.Size, IplDepth.IplDepth_8U, 1);
+            //b_plane= CvInvoke.cvCreateImage(_frame.Size, IplDepth.IplDepth_8U, 1);
+            //r_range= CvInvoke.cvCreateImage(_frame.Size, IplDepth.IplDepth_8U, 1);
+            //g_range= CvInvoke.cvCreateImage(_frame.Size, IplDepth.IplDepth_8U, 1);
+            //b_range= CvInvoke.cvCreateImage(_frame.Size, IplDepth.IplDepth_8U, 1);
+            //rgb_and= CvInvoke.cvCreateImage(_frame.Size, IplDepth.IplDepth_8U, 1);
+            // CvInvoke.cvCopy(image, rgb, IntPtr.Zero);
+            // CvInvoke.Split(rgb, dest);
+            Mat src = CvInvoke.Imread(_filename, ImreadModes.Color); //load  image
+            
+            Mat[] bgr=new Mat[3];   //destination array
+            Mat dst1 = new Mat();
+            Mat dst2 = new Mat();
+            Mat dst3 = new Mat();
+            Mat result = new Mat();
+            
+            bgr =src.Split();//split source 
+            
+            CvInvoke.Threshold(bgr[0], dst1,50,250, ThresholdType.Binary);
+            CvInvoke.Threshold(bgr[1], dst2, 50, 255, ThresholdType.Binary);
+            CvInvoke.Threshold(bgr[2], dst3, 50,255, ThresholdType.Binary);
+            CvInvoke.BitwiseAnd(dst2, dst3, result);
+            //Note: OpenCV uses BGR color order
+            CvInvoke.Imwrite("blue.png", bgr[0]); //blue channel
+            CvInvoke.Imwrite("green.png", bgr[1]); //green channel
+            CvInvoke.Imwrite("red.png", bgr[2]); //red channel
+            CvInvoke.Imwrite("Преобразованная хрень1.png", dst1);
+            CvInvoke.Imwrite("Преобразованная хрень2.png", dst2);
+            CvInvoke.Imwrite("Преобразованная хрень3.png", dst3);
+            CvInvoke.Imwrite("РЕЗУЛЬТАТ.png", result);
+            Bitmap tempimage = dst1.Bitmap;
+            processorFrame.ProcessImage(tempimage);
+        }
+
         private void nextFrameButton_Click(object sender, EventArgs e)
         {
             frameNum++;
@@ -136,7 +196,7 @@ namespace SportVideoProcessing
             Bitmap bitmap;
             bitmap = reader.ReadVideoFrame();
             Image<Bgr, byte> tempFrame = new Image<Bgr, byte>(bitmap);
-            imageBox1.Image = tempFrame;
+            //imageBox1.Image = tempFrame;
             // motionLevel will indicate the amount of motion as a percentage.
            // motionLevel = motionDetector.ProcessFrame(videoFrame);
             numFrameLabel.Text = frameNum.ToString();
@@ -147,9 +207,7 @@ namespace SportVideoProcessing
             Bitmap videoFrame=null;
             for (int i=0; i<frameCount;i++)
             {
-               videoFrame = reader.ReadVideoFrame();
-                // process the frame somehow
-                // ...
+               videoFrame = reader.ReadVideoFrame();                
                 pictureBox1.Image = videoFrame;
             }
             //videoFrame.Dispose();

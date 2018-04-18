@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26430.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportVideoProcessing", "SportVideoProcessing\SportVideoProcessing.csproj", "{8F1573DA-D3E8-418E-B503-89FD636F6983}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContourAnalysisProcessing", "..\..\ContourAnalysis\ContourAnalysis\CAProcessing\ContourAnalysisProcessing.csproj", "{38F5165F-094D-42E5-B4AA-7BF299901F5F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContourAnalysisProcessing", "..\..\..\..\Downloads\ContourAnalysis\ContourAnalysis\CAProcessing\ContourAnalysisProcessing.csproj", "{38F5165F-094D-42E5-B4AA-7BF299901F5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
