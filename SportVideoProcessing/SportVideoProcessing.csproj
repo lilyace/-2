@@ -79,14 +79,16 @@
     <Reference Include="Accord.Vision, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
       <HintPath>..\packages\Accord.Vision.3.8.0\lib\net46\Accord.Vision.dll</HintPath>
     </Reference>
-    <Reference Include="ContourAnalysisProcessing">
-      <HintPath>..\..\..\..\..\Downloads\ContourAnalysis\ContourAnalysis\ContourAnalysisDemo\bin\Debug\ContourAnalysisProcessing.dll</HintPath>
+    <Reference Include="Emgu.CV">
+      <HintPath>..\..\..\..\..\Downloads\ContourAnalysis\ContourAnalysis\CAProcessing\Emgu.CV.dll</HintPath>
+      <Aliases>oldLibrary</Aliases>
     </Reference>
     <Reference Include="Emgu.CV.UI, Version=3.4.1.2976, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EMGU.CV.3.4.1.2976\lib\net35\Emgu.CV.UI.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.CV.World, Version=3.4.1.2976, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EMGU.CV.3.4.1.2976\lib\net35\Emgu.CV.World.dll</HintPath>
+      <Aliases>newWorld</Aliases>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -192,6 +194,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Downloads\ContourAnalysis\ContourAnalysis\CAProcessing\ContourAnalysisProcessing.csproj">
+      <Project>{38f5165f-094d-42e5-b4aa-7bf299901f5f}</Project>
+      <Name>ContourAnalysisProcessing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
