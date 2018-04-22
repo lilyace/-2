@@ -207,3 +207,7 @@ C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcess
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ContourAnalysisProcessing.pdb
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ContourAnalysisProcessing.dll.config
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ContourAnalysis.pdb
+C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\obj\Debug\SportVideoProcessing.ShowHistogram.resources
+C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.UI.pdb
+C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.World.pdb
+C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\zh-CN\Emgu.CV.UI.resources.dll

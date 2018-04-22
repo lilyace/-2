@@ -28,7 +28,7 @@ namespace SportVideoProcessing
 {
     public partial class Form1 : Form
     {
-
+        newWorld::Emgu.CV.Mat src;
         private VideoFileReader reader = new VideoFileReader();
         private long frameCount;
         private long frameNum;
@@ -117,8 +117,7 @@ namespace SportVideoProcessing
             {
                 Bitmap _frameInFrame=_frame.Clone(processorFrame.contours[i].BoundingRectangle,_frame.PixelFormat);
                 List<tessnet2.Word> text = ocr.DoOCRNormal(_frameInFrame, "eng");
-                if (text.Count != 0)
-                    MessageBox.Show("Нашли цифру в примере "+i.ToString() );
+               
                 //string path = @"Найденные контуры\" + i.ToString() + ".png";
                 //_frameInFrame.Save(path);
             }
@@ -140,29 +139,42 @@ namespace SportVideoProcessing
         }
         public void WorkWithFrame(Bitmap _frame, string _filename)
         {
-            newWorld::Emgu.CV.Mat src = newWorld::Emgu.CV.CvInvoke.Imread(_filename, newWorld::Emgu.CV.CvEnum.ImreadModes.Color); //load  image
+            src = newWorld::Emgu.CV.CvInvoke.Imread(_filename, newWorld::Emgu.CV.CvEnum.ImreadModes.Grayscale); //load  image
 
             newWorld::Emgu.CV.Mat[] bgr=new newWorld::Emgu.CV.Mat[3];   //destination array
             newWorld::Emgu.CV.Mat dst1 = new newWorld::Emgu.CV.Mat();
             newWorld::Emgu.CV.Mat dst2 = new newWorld::Emgu.CV.Mat();
             newWorld::Emgu.CV.Mat dst3 = new newWorld::Emgu.CV.Mat();
             newWorld::Emgu.CV.Mat result = new newWorld::Emgu.CV.Mat();
-            
-            bgr =src.Split();//split source 
-            
-            newWorld::Emgu.CV.CvInvoke.Threshold(bgr[0], dst1,50,250, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
-            newWorld::Emgu.CV.CvInvoke.Threshold(bgr[1], dst2, 50, 255, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
-            newWorld::Emgu.CV.CvInvoke.Threshold(bgr[2], dst3, 50,255, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
-            newWorld::Emgu.CV.CvInvoke.BitwiseAnd(dst2, dst3, result);
-            //Note: OpenCV uses BGR color order
-            newWorld::Emgu.CV.CvInvoke.Imwrite("blue.png", bgr[0]); //blue channel
-            newWorld::Emgu.CV.CvInvoke.Imwrite("green.png", bgr[1]); //green channel
-            newWorld::Emgu.CV.CvInvoke.Imwrite("red.png", bgr[2]); //red channel
-            newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень1.png", dst1);
-            newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень2.png", dst2);
-            newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень3.png", dst3);
-            newWorld::Emgu.CV.CvInvoke.Imwrite("РЕЗУЛЬТАТ.png", result);
-            Bitmap btm = new Bitmap(dst1.Bitmap);
+
+            //bgr =src.Split();//split source 
+
+            //newWorld::Emgu.CV.CvInvoke.Threshold(bgr[0], dst1,50,250, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
+            // newWorld::Emgu.CV.CvInvoke.Threshold(bgr[1], dst2, 50, 255, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
+            //newWorld::Emgu.CV.CvInvoke.Threshold(bgr[2], dst3, 50,255, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
+
+            ////Note: OpenCV uses BGR color order
+            //newWorld::Emgu.CV.CvInvoke.Imwrite("blue.png", bgr[0]); //blue channel
+            //newWorld::Emgu.CV.CvInvoke.Imwrite("green.png", bgr[1]); //green channel
+            //newWorld::Emgu.CV.CvInvoke.Imwrite("red.png", bgr[2]); //red channel
+            //newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень1.png", dst1);
+            //newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень2.png", dst2);
+            //newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень3.png", dst3);
+            newWorld::Emgu.CV.DenseHistogram Histo = new newWorld::Emgu.CV.DenseHistogram(255, new newWorld::Emgu.CV.Structure.RangeF(0, 255));
+            newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Gray, byte> im = src.ToImage<newWorld::Emgu.CV.Structure.Gray, byte>();
+            Histo.Calculate<byte>(new newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Gray, byte>[] { im },true, null);
+            int i = 0;
+            float[] valuesHisto = Histo.GetBinValues();
+
+            while (valuesHisto[i] < 900)
+                i++;
+            int j = 254;
+            while (valuesHisto[j] < 430)
+                j--;
+            // newWorld::Emgu.CV.CvInvoke.Threshold(src, dst1, 134, 250, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
+            newWorld::Emgu.CV.CvInvoke.InRange(src, new newWorld::Emgu.CV.ScalarArray(new newWorld::Emgu.CV.Structure.MCvScalar(i)), new newWorld::Emgu.CV.ScalarArray(new newWorld::Emgu.CV.Structure.MCvScalar(j)), dst1);
+                 
+                Bitmap btm = new Bitmap(dst1.Bitmap);
             processorFrame = new ImageProcessor();
         
             processorFrame.adaptiveThresholdBlockSize = 4;
@@ -172,7 +184,7 @@ namespace SportVideoProcessing
             pictureBox2.Image = btm;
             pictureBox1.Image = _frame;
             btm.Save("Проверка!.png");
-            RecognizeNumbers(_frame);
+           // RecognizeNumbers(_frame);
            
         }
         public double GetMiddleArea()
@@ -262,6 +274,12 @@ namespace SportVideoProcessing
                     }
                 }
             }
+        }
+
+        private void showHistButton_Click(object sender, EventArgs e)
+        {
+            ShowHistogram sh = new ShowHistogram(src);
+            sh.ShowDialog();
         }
     }
     public class Ocr
