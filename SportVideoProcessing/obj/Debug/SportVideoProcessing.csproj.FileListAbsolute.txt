@@ -211,3 +211,6 @@ C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcess
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.UI.pdb
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.World.pdb
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\zh-CN\Emgu.CV.UI.resources.dll
+C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\MatchingBlocks(TSS).exe
+C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\MatchingBlocks(TSS).pdb
+C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\MatchingBlocks(TSS).exe.config

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportVideoProcessing", "Spo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContourAnalysisProcessing", "..\..\..\..\Downloads\ContourAnalysis\ContourAnalysis\CAProcessing\ContourAnalysisProcessing.csproj", "{38F5165F-094D-42E5-B4AA-7BF299901F5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchingBlocks(TSS)", "..\..\..\..\Documents\Visual Studio 2017\Projects\MBA\MatchingBlocks(TSS)\MatchingBlocks(TSS)\MatchingBlocks(TSS).csproj", "{D8A40CE7-A74A-4DE9-8D52-91F3725251EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{38F5165F-094D-42E5-B4AA-7BF299901F5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38F5165F-094D-42E5-B4AA-7BF299901F5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38F5165F-094D-42E5-B4AA-7BF299901F5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8A40CE7-A74A-4DE9-8D52-91F3725251EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8A40CE7-A74A-4DE9-8D52-91F3725251EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8A40CE7-A74A-4DE9-8D52-91F3725251EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8A40CE7-A74A-4DE9-8D52-91F3725251EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

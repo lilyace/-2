@@ -21,6 +21,7 @@ using Emgu.CV.UI;
 //using Emgu.CV.Cuda;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using MatchingBlocks_TSS_;
 
 
 
@@ -28,15 +29,27 @@ namespace SportVideoProcessing
 {
     public partial class Form1 : Form
     {
-        newWorld::Emgu.CV.Mat src;
+        //блок переменных общих
+        Bitmap currentMainFrameBitmap;
+        Bitmap prevMainFrameBitmap;
+        Bitmap frameForDrawing;
+        string path;
+        //блок переменных для обработки кадра
+        newWorld::Emgu.CV.Mat grayFrame;        
+        newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Bgr, Byte> mainFrameImage;
+        List<Rectangle> allContours=new List<Rectangle>();
+        //блок переменных для распознавания движения
         private VideoFileReader reader = new VideoFileReader();
         private long frameCount;
         private long frameNum;
         float motionLevel;
         double middleLength;
         double middleArea;
-        ContourAnalysisNS.ImageProcessor processorFrame;
-        newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Bgr, Byte> Myframe;
+        Graphics gr;
+        ContourAnalysisNS.ImageProcessor processorFrame = new ImageProcessor();
+        ContourAnalysisNS.ImageProcessor processorNumbersContours;
+
+
         Accord.Vision.Motion.TwoFramesDifferenceDetector detector = new Accord.Vision.Motion.TwoFramesDifferenceDetector()
         {
             DifferenceThreshold = 2,
@@ -56,37 +69,36 @@ namespace SportVideoProcessing
 
         Accord.Vision.Motion.MotionDetector motionDetector = null;
         public Form1()
-        {            
-            InitializeComponent();            
+        {
+            processorFrame.adaptiveThresholdBlockSize = 4;
+            processorFrame.blur = false;
+            InitializeComponent();
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+
         }
 
         private void открытьВидеоToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            motionDetector = new Accord.Vision.Motion.MotionDetector(detector, processor);
+           // motionDetector = new Accord.Vision.Motion.MotionDetector(detector, processor);
             frameNum = 0;
             if (reader.IsOpen)
-                reader.Close();
-            string fileName;
+                reader.Close();           
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                fileName = openFileDialog1.FileName;
-                ReadVideo(fileName);
-                //ProcessFrame(fileName);
-                //nextFrameButton.Enabled = true;
+                path = openFileDialog1.FileName;
+               
+                ReadVideo();               
+                nextFrameButton.Enabled = true;
             }
-
         }
-        void ProcessFrame(string _fileName)
+        
+       void RecognizePeopleDefault()
         {
-            reader.Open(_fileName);
-            Bitmap btm = new Bitmap(_fileName);//reader.ReadVideoFrame();
-            RecognizePeople(_fileName);
-            pictureBox1.Image = btm;
-            //  RecognizeNumbers(btm);
-        }
-       void RecognizePeople(string _fileName)
-        {
-            newWorld::Emgu.CV.Mat image = new newWorld::Emgu.CV.Mat(_fileName);
+            listBox1.Items.Clear();        
+            currentMainFrameBitmap.Save("Промежуточное изображение.png");
+            allContours.Clear();
+            gr = Graphics.FromImage(frameForDrawing);
+            newWorld::Emgu.CV.Mat image = new newWorld::Emgu.CV.Mat("Промежуточное изображение.png");
             long processingTime;
             Rectangle[] results;
             if (newWorld::Emgu.CV.Cuda.CudaInvoke.HasCuda)
@@ -99,69 +111,89 @@ namespace SportVideoProcessing
                 using (newWorld::Emgu.CV.UMat uImage = image.GetUMat(newWorld::Emgu.CV.CvEnum.AccessType.ReadWrite))
                     results = FindMen.Find(uImage, out processingTime);
             }
+            int i = 1;
             foreach (Rectangle rect in results)
             {
-                newWorld::Emgu.CV.CvInvoke.Rectangle(image, rect, new newWorld::Emgu.CV.Structure.Bgr(Color.Red).MCvScalar);
+                allContours.Add(rect);
+                listBox1.Items.Add("Спортсмен "+i.ToString());
+                i++;
+               // newWorld::Emgu.CV.CvInvoke.Rectangle(image, rect, new newWorld::Emgu.CV.Structure.Bgr(Color.Red).MCvScalar);
             }
-            newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Bgr, byte> im = image.ToImage<newWorld::Emgu.CV.Structure.Bgr, Byte>();
-            pictureBox1.Image = im.ToBitmap();      
-        }
-        void RecognizeNumbers(Bitmap _frame)
-        {
-            Ocr ocr = new Ocr();
-            tessnet2.Tesseract tessocr = new tessnet2.Tesseract();
-            tessocr.SetVariable("tessedit_char_whitelist", "0123456789*+-=");
-            tessocr.Init(null, "eng", false);            
-            
-            for (int i = 0; i < processorFrame.contours.Count; i++)
+            int j = 1;
+            foreach (Rectangle _contour in allContours)
             {
-                Bitmap _frameInFrame=_frame.Clone(processorFrame.contours[i].BoundingRectangle,_frame.PixelFormat);
-                List<tessnet2.Word> text = ocr.DoOCRNormal(_frameInFrame, "eng");
-               
-                //string path = @"Найденные контуры\" + i.ToString() + ".png";
-                //_frameInFrame.Save(path);
+                gr.DrawRectangle(new Pen(Color.Red), _contour);
+               // gr.DrawLines(new Pen(Color.Red), _contour.ToArray());
+                gr.DrawString(j.ToString(), new Font("Arial", 14), Brushes.AliceBlue, _contour.X, _contour.Y);
+                j++;
             }
-            //MessageBox.Show("Сохранено");
-        }       
-        void ReadVideo(string _fileName)
+            
+            pictureBox1.Image = frameForDrawing; // тут же подключается отрисовка
+            nRecogLabel.Text = results.Length.ToString();
+                     
+            ToBinContours();
+        }        
+        public void ToBinContours()
+        {
+            newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Gray, byte> _contour;
+            Bitmap _tempToSave;//контур контуров
+            Bitmap _frameInContour; //= mainFrameImage.ToImage<newWorld::Emgu.CV.Structure.Gray, byte>();
+            //tessnet2.Tesseract tessocr = new tessnet2.Tesseract();
+            //tessocr.SetVariable("tessedit_char_whitelist", "0123456789");
+            //tessocr.Init(null, "eng", false);
+            for (int i = 0; i < allContours.Count; i++)
+            {
+                //if ((allContours[i].Height  < 150) && (allContours[i].Height > 30) && (allContours[i].Width < 200) && (allContours[i].Width > 22))
+                //{
+                    _frameInContour = currentMainFrameBitmap.Clone(allContours[i], currentMainFrameBitmap.PixelFormat);
+                    _contour = new newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Gray, byte>(_frameInContour);
+               // newWorld::Emgu.CV.CvInvoke.Threshold(_contour, _contour, 100, 250, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
+
+               // processorNumbersContours = new ImageProcessor();
+               // processorNumbersContours.ProcessImage(_contour.Bitmap);
+                string path = @"Бинаризированные приведенные контуры\" + i.ToString() + ".png";
+                _contour.Save(path);
+                
+                //for (int j = 0; j < processorNumbersContours.contours.Count; j++)
+                //{
+                //    if ((processorNumbersContours.contours[j].BoundingRectangle.Width < 20) && (processorNumbersContours.contours[j].BoundingRectangle.Width > 10) && (processorNumbersContours.contours[j].BoundingRectangle.Height > 10) && (processorNumbersContours.contours[j].BoundingRectangle.Height < 20))
+                //    {
+                //        _tempToSave = _contour.Bitmap.Clone(processorNumbersContours.contours[j].BoundingRectangle, _contour.Bitmap.PixelFormat);
+                //        //_tempToSave.Save(@"Бинаризированные приведенные контуры\" + i.ToString() + "_" + j.ToString() + ".png");
+                //        // var text = tessocr.DoOCR(_tempToSave, Rectangle.Empty);
+                //        _tempToSave.Dispose();
+                //    }
+                //    //}
+                //    //    //newWorld::Emgu.CV.CvInvoke.Resize(_contour, _contour, new Size(50, 50), 0, 0, newWorld::Emgu.CV.CvEnum.Inter.Linear);
+                //}
+                _frameInContour.Dispose();
+            }
+        }
+        public void ReadVideo()
         {
             Regex regex = new Regex(@"Тестовые видеофайлы\\.+$");
-            Match match = regex.Match(_fileName);            
+            Match match = regex.Match(path);            
             //nameLabel.Text = match.Value.Remove(0,6);            
-            reader.Open(_fileName);
+            reader.Open(path);
             frameCount = reader.FrameCount;
             durationLabel.Text = frameCount.ToString();
-            label5.Text = reader.Height.ToString() + "x" + reader.Width.ToString();
-            Bitmap firstFrame;        
-            firstFrame = reader.ReadVideoFrame(); // берем первый кадр и делаем на нем распознаванием           
-            // RecognizePeople(_fileName);
-            WorkWithFrame(firstFrame, _fileName);
+            label5.Text = reader.Height.ToString() + "x" + reader.Width.ToString();                   
+            currentMainFrameBitmap = reader.ReadVideoFrame(); // берем первый кадр и делаем на нем распознаванием     
+            frameForDrawing = currentMainFrameBitmap.Clone(new Rectangle(0, 0, currentMainFrameBitmap.Width, currentMainFrameBitmap.Height), currentMainFrameBitmap.PixelFormat);
+            
+            RecognizePeopleDefault();// дефолтное распознавание
+            //MyPeopleRecognize(); //Мое распознавание
+
         }
-        public void WorkWithFrame(Bitmap _frame, string _filename)
+        public void MyPeopleRecognize()
         {
-            src = newWorld::Emgu.CV.CvInvoke.Imread(_filename, newWorld::Emgu.CV.CvEnum.ImreadModes.Grayscale); //load  image
+            grayFrame = newWorld::Emgu.CV.CvInvoke.Imread(path, newWorld::Emgu.CV.CvEnum.ImreadModes.Grayscale); //load  image
 
             newWorld::Emgu.CV.Mat[] bgr=new newWorld::Emgu.CV.Mat[3];   //destination array
-            newWorld::Emgu.CV.Mat dst1 = new newWorld::Emgu.CV.Mat();
-            newWorld::Emgu.CV.Mat dst2 = new newWorld::Emgu.CV.Mat();
-            newWorld::Emgu.CV.Mat dst3 = new newWorld::Emgu.CV.Mat();
-            newWorld::Emgu.CV.Mat result = new newWorld::Emgu.CV.Mat();
-
-            //bgr =src.Split();//split source 
-
-            //newWorld::Emgu.CV.CvInvoke.Threshold(bgr[0], dst1,50,250, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
-            // newWorld::Emgu.CV.CvInvoke.Threshold(bgr[1], dst2, 50, 255, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
-            //newWorld::Emgu.CV.CvInvoke.Threshold(bgr[2], dst3, 50,255, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
-
-            ////Note: OpenCV uses BGR color order
-            //newWorld::Emgu.CV.CvInvoke.Imwrite("blue.png", bgr[0]); //blue channel
-            //newWorld::Emgu.CV.CvInvoke.Imwrite("green.png", bgr[1]); //green channel
-            //newWorld::Emgu.CV.CvInvoke.Imwrite("red.png", bgr[2]); //red channel
-            //newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень1.png", dst1);
-            //newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень2.png", dst2);
-            //newWorld::Emgu.CV.CvInvoke.Imwrite("Преобразованная хрень3.png", dst3);
+            newWorld::Emgu.CV.Mat dst1 = new newWorld::Emgu.CV.Mat();           
+            newWorld::Emgu.CV.Mat result = new newWorld::Emgu.CV.Mat();            
             newWorld::Emgu.CV.DenseHistogram Histo = new newWorld::Emgu.CV.DenseHistogram(255, new newWorld::Emgu.CV.Structure.RangeF(0, 255));
-            newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Gray, byte> im = src.ToImage<newWorld::Emgu.CV.Structure.Gray, byte>();
+            newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Gray, byte> im = grayFrame.ToImage<newWorld::Emgu.CV.Structure.Gray, byte>();
             Histo.Calculate<byte>(new newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Gray, byte>[] { im },true, null);
             int i = 0;
             float[] valuesHisto = Histo.GetBinValues();
@@ -172,19 +204,19 @@ namespace SportVideoProcessing
             while (valuesHisto[j] < 430)
                 j--;
             // newWorld::Emgu.CV.CvInvoke.Threshold(src, dst1, 134, 250, newWorld::Emgu.CV.CvEnum.ThresholdType.Binary);
-            newWorld::Emgu.CV.CvInvoke.InRange(src, new newWorld::Emgu.CV.ScalarArray(new newWorld::Emgu.CV.Structure.MCvScalar(i)), new newWorld::Emgu.CV.ScalarArray(new newWorld::Emgu.CV.Structure.MCvScalar(j)), dst1);
+            newWorld::Emgu.CV.CvInvoke.InRange(grayFrame, new newWorld::Emgu.CV.ScalarArray(new newWorld::Emgu.CV.Structure.MCvScalar(i)), new newWorld::Emgu.CV.ScalarArray(new newWorld::Emgu.CV.Structure.MCvScalar(j)), dst1);
                  
                 Bitmap btm = new Bitmap(dst1.Bitmap);
-            processorFrame = new ImageProcessor();
         
-            processorFrame.adaptiveThresholdBlockSize = 4;
-            processorFrame.blur = false;
             processorFrame.ProcessImage(btm);
-            middleArea=GetMiddleArea();
+            for (int p = 0; p < processorFrame.contours.Count; p++)
+                if ((processorFrame.contours[p].BoundingRectangle.Height < 150) && (processorFrame.contours[p].BoundingRectangle.Height > 30) && (processorFrame.contours[p].BoundingRectangle.Width < 200) && (processorFrame.contours[p].BoundingRectangle.Width > 22))
+                   allContours.Add(new Rectangle(processorFrame.contours[p].BoundingRectangle.X, processorFrame.contours[p].BoundingRectangle.Y,processorFrame.contours[p].BoundingRectangle.Width, processorFrame.contours[p].BoundingRectangle.Height));//добавить добавление контуров
+            middleArea =GetMiddleArea();
             pictureBox2.Image = btm;
-            pictureBox1.Image = _frame;
+            pictureBox1.Image = currentMainFrameBitmap;
             btm.Save("Проверка!.png");
-           // RecognizeNumbers(_frame);
+            ToBinContours();
            
         }
         public double GetMiddleArea()
@@ -197,45 +229,24 @@ namespace SportVideoProcessing
             }
             _midArea = _midArea / processorFrame.contours.Count;
             return _midArea;
-        }
-        public double GetMiddleLength()
-        {
-            double _midLength = 0;
-            int i = 0;
-            for (i = 0; i < processorFrame.contours.Count; i++)
-            {
-                //_midLength += processorFrame.contours[i].le;
-            }
-            _midLength = _midLength / processorFrame.contours.Count;
-            return _midLength;
-        }
+        }      
 
         private void nextFrameButton_Click(object sender, EventArgs e)
         {
             frameNum++;
             if(frameNum==reader.FrameCount)
             {
-                MessageBox.Show("Кадры видео");                
+                MessageBox.Show("Видео кончилось");                
             }
-            Bitmap bitmap;
-            bitmap = reader.ReadVideoFrame();
-            newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Bgr, byte> tempFrame = new newWorld::Emgu.CV.Image<newWorld::Emgu.CV.Structure.Bgr, byte>(bitmap);
-            //imageBox1.Image = tempFrame;
-            // motionLevel will indicate the amount of motion as a percentage.
-           // motionLevel = motionDetector.ProcessFrame(videoFrame);
+            prevMainFrameBitmap = currentMainFrameBitmap.Clone(new Rectangle(0,0, currentMainFrameBitmap.Width, currentMainFrameBitmap.Height), currentMainFrameBitmap.PixelFormat);
+            currentMainFrameBitmap = reader.ReadVideoFrame();
+            //frameForDrawing.Dispose();
+            frameForDrawing = currentMainFrameBitmap.Clone(new Rectangle(0, 0, currentMainFrameBitmap.Width, currentMainFrameBitmap.Height), currentMainFrameBitmap.PixelFormat);
             numFrameLabel.Text = frameNum.ToString();
+            RecognizePeopleDefault();
+     
         }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            Bitmap videoFrame=null;
-            for (int i=0; i<frameCount;i++)
-            {
-               videoFrame = reader.ReadVideoFrame();                
-                pictureBox1.Image = videoFrame;
-            }
-            //videoFrame.Dispose();
-        }
+       
 
         private void настройкиToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -257,29 +268,54 @@ namespace SportVideoProcessing
             }
             motionDetector.MotionDetectionAlgorithm = tmpDet;
             motionDetector.MotionProcessingAlgorithm = tmpProc;
-        }
-
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
-        {
-            if (processorFrame != null)
-            {
-                foreach (oldLibrary::Emgu.CV.Contour<Point> _contour in processorFrame.contours)
-                {
-                    
-                    if ((_contour.BoundingRectangle.Height<150) && (_contour.BoundingRectangle.Height>20) && (_contour.BoundingRectangle.Width<200) && (_contour.BoundingRectangle.Width>10))
-                    {
-                        Rectangle tempRect = _contour.BoundingRectangle;
-                        e.Graphics.DrawRectangle(new Pen(Color.Red), tempRect);
-                        //e.Graphics.DrawLines(new Pen(Color.Red), _contour.ToArray());
-                    }
-                }
-            }
-        }
+        }       
 
         private void showHistButton_Click(object sender, EventArgs e)
         {
-            ShowHistogram sh = new ShowHistogram(src);
+            ShowHistogram sh = new ShowHistogram(grayFrame);
             sh.ShowDialog();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            panel1.Enabled = checkBox1.Checked;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            nextFrameButton.Enabled = false;
+            //чистый кадр из текущего для рисовки
+            frameForDrawing = currentMainFrameBitmap.Clone(new Rectangle (0,0, currentMainFrameBitmap.Width, currentMainFrameBitmap.Height), currentMainFrameBitmap.PixelFormat);
+            //привязка к графике
+            gr = Graphics.FromImage(frameForDrawing);
+            //создание переменных для блоков сравнения
+            Bitmap currTempCont, prevTempCont;
+            //выбор индекса для отслеживания
+            int i = listBox1.SelectedIndex;
+            List<Rectangle> motionRect = new List<Rectangle>();
+            
+                currTempCont = currentMainFrameBitmap.Clone(allContours[i], currentMainFrameBitmap.PixelFormat);
+                prevTempCont = prevMainFrameBitmap.Clone(allContours[i], prevMainFrameBitmap.PixelFormat);
+                motionRect = MatchingBlocks_TSS_.Program.MainProgram(currTempCont, prevTempCont, currTempCont, 20, 7, i.ToString());
+                currTempCont.Dispose();
+                prevTempCont.Dispose();
+            
+            
+            Pen pen = new Pen(Color.Green);
+            foreach (Rectangle rect in motionRect)
+                gr.DrawRectangle(pen, new Rectangle(allContours[i].X+rect.X, allContours[i].Y + rect.Y, 20, 20));
+            //gr.DrawLine(pen, new Point(0,0), new Point(50,50));
+            pictureBox1.Image = frameForDrawing;
+        }
+
+        
+        public void PlayVideo()
+        { }
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBox1.SelectedIndex != -1)
+                button1.Enabled = true;
+            else button1.Enabled = false;
         }
     }
     public class Ocr

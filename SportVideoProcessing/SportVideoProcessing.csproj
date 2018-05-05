@@ -206,6 +206,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Documents\Visual Studio 2017\Projects\MBA\MatchingBlocks%28TSS%29\MatchingBlocks%28TSS%29\MatchingBlocks%28TSS%29.csproj">
+      <Project>{d8a40ce7-a74a-4de9-8d52-91f3725251ea}</Project>
+      <Name>MatchingBlocks%28TSS%29</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\Downloads\ContourAnalysis\ContourAnalysis\CAProcessing\ContourAnalysisProcessing.csproj">
       <Project>{38f5165f-094d-42e5-b4aa-7bf299901f5f}</Project>
       <Name>ContourAnalysisProcessing</Name>
