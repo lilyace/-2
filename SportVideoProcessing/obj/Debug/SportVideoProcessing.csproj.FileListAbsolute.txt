@@ -169,7 +169,6 @@ C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcess
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.UI.dll
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.World.dll
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Tesseract.dll
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\tessnet2_32.dll
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ZedGraph.dll
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Accord.xml
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Accord.Imaging.xml
@@ -197,17 +196,8 @@ C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcess
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\zh-cn\ZedGraph.resources.dll
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\zh-tw\ZedGraph.resources.dll
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.World.xml
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\opencv_core220.dll
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\opencv_highgui220.dll
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\opencv_imgproc220.dll
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ContourAnalysisProcessing.dll
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.dll
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ContourAnalysis.dll
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.Util.dll
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ContourAnalysisProcessing.pdb
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ContourAnalysisProcessing.dll.config
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\ContourAnalysis.pdb
-C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\obj\Debug\SportVideoProcessing.ShowHistogram.resources
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.UI.pdb
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\Emgu.CV.World.pdb
 C:\Users\user\Desktop\Дипломчик\Программа\-2\SportVideoProcessing\bin\Debug\zh-CN\Emgu.CV.UI.resources.dll
