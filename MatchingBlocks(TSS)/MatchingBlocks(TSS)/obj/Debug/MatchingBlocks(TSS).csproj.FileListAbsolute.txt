@@ -1,0 +1,5 @@
+c:\Users\user\Documents\Visual Studio 2017\Projects\MBA\MatchingBlocks(TSS)\MatchingBlocks(TSS)\bin\Debug\MatchingBlocks(TSS).exe.config
+c:\Users\user\Documents\Visual Studio 2017\Projects\MBA\MatchingBlocks(TSS)\MatchingBlocks(TSS)\bin\Debug\MatchingBlocks(TSS).exe
+c:\Users\user\Documents\Visual Studio 2017\Projects\MBA\MatchingBlocks(TSS)\MatchingBlocks(TSS)\bin\Debug\MatchingBlocks(TSS).pdb
+c:\Users\user\Documents\Visual Studio 2017\Projects\MBA\MatchingBlocks(TSS)\MatchingBlocks(TSS)\obj\Debug\MatchingBlocks(TSS).exe
+c:\Users\user\Documents\Visual Studio 2017\Projects\MBA\MatchingBlocks(TSS)\MatchingBlocks(TSS)\obj\Debug\MatchingBlocks(TSS).pdb
